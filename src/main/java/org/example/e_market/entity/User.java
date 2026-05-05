@@ -1,9 +1,7 @@
 package org.example.e_market.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.example.e_market.entity.enums.AccountType;
 import org.example.e_market.entity.vendor.Vendor;
 
@@ -12,6 +10,8 @@ import java.util.UUID;
 
 @Getter @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "users")
 public class User {
