@@ -1,13 +1,20 @@
 package org.example.e_market.services.auth;
 
-import org.example.e_market.dto.LoginRequest;
-import org.example.e_market.dto.RegisterCustomerRequest;
+import org.example.e_market.dto.*;
 import org.example.e_market.utils.TokenPair;
 
 public interface AuthService {
 
     void registerCustomer(RegisterCustomerRequest request);
 
+    void registerVendor(RegisterVendorRequest request);
+
     TokenPair login(LoginRequest request);
+
+    TokenPair refreshToken(TokenRefreshRequest request);
+
+    void verifyOtp(OtpRequest request);
+
+    void resendOtp(OtpRequest request);
 
 }

@@ -1,12 +1,13 @@
 package org.example.e_market.controllers;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.e_market.dto.LoginRequest;
-import org.example.e_market.dto.RegisterCustomerRequest;
+import org.example.e_market.dto.*;
 import org.example.e_market.services.auth.AuthService;
 import org.example.e_market.utils.ApiResponse;
 import org.example.e_market.utils.TokenPair;
+import org.example.e_market.utils.views.OtpView;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,12 +22,21 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @PostMapping("/create-customer")
+    @PostMapping("/register/customer")
     public ResponseEntity<ApiResponse<String>> registerCustomer(@Valid @RequestBody RegisterCustomerRequest request) {
 
         authService.registerCustomer(request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Customer created successfully", null));
+
+    }
+
+    @PostMapping("/register/vendor")
+    public ResponseEntity<ApiResponse<String>> registerVendor(@Valid @RequestBody RegisterVendorRequest request) {
+
+        authService.registerVendor(request);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Vendor created successfully", null));
 
     }
 
@@ -36,4 +46,27 @@ public class AuthController {
         TokenPair tokenPair = authService.login(request);
         return ResponseEntity.ok(ApiResponse.success("Login successful", tokenPair));
     }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<ApiResponse<TokenPair>> verifyOtp(@JsonView(OtpView.Optional.class) @Valid @RequestBody OtpRequest request) {
+
+        authService.verifyOtp(request);
+        return ResponseEntity.ok(ApiResponse.success("User verification successful", null));
+    }
+
+    @PostMapping("/resend-otp")
+    public ResponseEntity<ApiResponse<TokenPair>> resendOtp(@JsonView(OtpView.Base.class) @Valid @RequestBody OtpRequest request) {
+
+        authService.resendOtp(request);
+        return ResponseEntity.ok(ApiResponse.success("Otp resend successful", null));
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<ApiResponse<TokenPair>> refreshToken(@Valid @RequestBody TokenRefreshRequest request) {
+
+        TokenPair tokenPair = authService.refreshToken(request);
+        return ResponseEntity.ok(ApiResponse.success("Token refresh successful", tokenPair));
+    }
+
+
 }

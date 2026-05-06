@@ -2,6 +2,7 @@ package org.example.e_market.exceptions;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.*;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -16,6 +17,17 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
+    @ExceptionHandler(CustomBadRequestException.class)
+    public ProblemDetail handleCustomBadRequestException(CustomBadRequestException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+        problemDetail.setTitle("Bad request");
+        problemDetail.setProperty("timestamp", LocalDateTime.now());
+        return problemDetail;
+    }
+
     @ExceptionHandler(CustomNotFoundException.class)
     public ProblemDetail handleCustomNotFoundException(CustomNotFoundException ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
@@ -23,6 +35,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 ex.getMessage()
         );
         problemDetail.setTitle("Resource Not Found");
+        problemDetail.setProperty("timestamp", LocalDateTime.now());
+        return problemDetail;
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ProblemDetail handleBadCredentialsException(BadCredentialsException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage()
+        );
+        problemDetail.setTitle("Bad credentials");
         problemDetail.setProperty("timestamp", LocalDateTime.now());
         return problemDetail;
     }
@@ -38,7 +61,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return problemDetail;
     }
 
- //    @ExceptionHandler(InsufficientStockException.class)
+    //    @ExceptionHandler(InsufficientStockException.class)
 //    public ProblemDetail handleStockIssue(InsufficientStockException ex) {
 //        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
 //                HttpStatus.BAD_REQUEST,

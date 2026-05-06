@@ -5,6 +5,11 @@ spring:
   config:
     import: "optional:file:.env[.properties]"
 
+  data:
+    redis:
+      host: localhost
+      port: 6380
+
   datasource:
     url: ${DB_URL}
     password: ${DB_PASSWORD}
@@ -20,6 +25,20 @@ spring:
         default_schema: public
         format_sql: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+
+  mail:
+    #    host: smtp.gmail.com
+    host: sandbox.smtp.mailtrap.io
+    password: ${MAIL_PASSWORD}
+    username: ${MAIL_USERNAME}
+    port: 465
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
 app:
   security:

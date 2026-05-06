@@ -14,6 +14,7 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 
 @Service
@@ -29,33 +30,47 @@ public class JwtService {
     private long refreshExpiration;
 
 
-    public TokenPair generateTokenPair(Authentication authentication, String accountType, Long vendorId) {
+    public TokenPair generateTokenPair(Authentication authentication, String accountType, UUID vendorId) {
+
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        return buildTokenPair(userDetails.getUsername(), accountType, vendorId);
+    }
+
+    public TokenPair generateTokenPair(UserDetails userDetails, String accountType, UUID vendorId) {
+
+        return buildTokenPair(userDetails.getUsername(), accountType, vendorId);
+    }
+
+    private TokenPair buildTokenPair(String username, String accountType, UUID vendorId) {
+
+        String accessToken = generateAccessToken(username, accountType, vendorId);
+        String refreshToken = generateRefreshToken(username);
 
         return TokenPair.builder()
-                .accessToken(generateAccessToken(authentication, accountType, vendorId))
-                .refreshToken(generateRefreshToken(authentication))
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .build();
     }
 
-    public String generateRefreshToken(Authentication authentication) {
+    public String generateRefreshToken(String username) {
 
-        return generateToken(authentication, refreshExpiration, Map.of());
+        return generateToken(username, refreshExpiration, Map.of());
     }
 
-    public String generateAccessToken(Authentication authentication, String accountType, Long vendorId) {
+    public String generateAccessToken(String username, String accountType, UUID vendorId) {
 
         Map<String, Object> claims = new HashMap<>();
 
         claims.put("accountType", accountType);
         claims.put("vendorId", vendorId);
 
-        return generateToken(authentication, jwtExpiration, claims);
+        return generateToken(username, jwtExpiration, claims);
     }
 
-    public String generateToken(Authentication authentication, long expiration, Map<String, Object> claims) {
+    public String generateToken(String username, long expiration, Map<String, Object> claims) {
 
 
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+//        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
         Date now = new Date();
         Date expires = new Date(now.getTime() + expiration);
@@ -64,7 +79,7 @@ public class JwtService {
                 .header()
                 .add("typ", "JWT")
                 .and()
-                .subject(userDetails.getUsername())
+                .subject(username)
                 .claims(claims)
                 .issuedAt(now)
                 .expiration(expires)

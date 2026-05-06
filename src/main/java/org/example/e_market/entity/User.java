@@ -8,7 +8,8 @@ import org.example.e_market.entity.vendor.Vendor;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Getter @Setter
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -35,6 +36,8 @@ public class User {
 
     @Column(updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    private boolean isVerified = false;
 
     private LocalDateTime deletedAt;
 }

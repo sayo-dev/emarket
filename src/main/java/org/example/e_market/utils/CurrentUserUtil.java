@@ -8,6 +8,8 @@ import org.example.e_market.repositories.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @RequiredArgsConstructor
 @Component
 public class CurrentUserUtil {
@@ -20,7 +22,7 @@ public class CurrentUserUtil {
                 .orElseThrow(() -> new CustomNotFoundException("User not found in context"));
     }
 
-    public Long getCurrentVendorId() {
+    public UUID getCurrentVendorId() {
         return getCurrentUser().getVendor().getId();
     }
 
