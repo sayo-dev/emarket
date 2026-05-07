@@ -1,4 +1,4 @@
-package org.example.e_market.dto;
+package org.example.e_market.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonView;

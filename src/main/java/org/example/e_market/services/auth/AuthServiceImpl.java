@@ -3,7 +3,7 @@ package org.example.e_market.services.auth;
 import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.example.e_market.dto.*;
+import org.example.e_market.dto.request.*;
 import org.example.e_market.entity.User;
 import org.example.e_market.entity.enums.AccountType;
 import org.example.e_market.entity.enums.OtpPurpose;
@@ -45,7 +45,7 @@ public class AuthServiceImpl implements AuthService {
     private final EmailService emailService;
 
     @Override
-    public void registerCustomer(RegisterCustomerRequest request) {
+    public void registerAccount(RegisterAccountRequest request) {
 
         if (userRepository.existsByEmail(request.email()))
             throw new CustomConflictException("Email already registered");
@@ -59,7 +59,6 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         user = userRepository.save(user);
-
         sendVerificationMail(user.getEmail(), user.getName());
     }
 
@@ -80,7 +79,6 @@ public class AuthServiceImpl implements AuthService {
 //                .build();
 
         vendor = vendorRepository.save(vendor);
-
 
         User user = new User();
         user.setVendor(vendor);
@@ -141,8 +139,8 @@ public class AuthServiceImpl implements AuthService {
 
         if (user.isVerified()) throw new CustomBadRequestException("User already verified");
 
-        String hashedPassword = redisTemplate.opsForValue().get(getOtpKey(request.email())).toString();
-        if (!passwordEncoder.matches(request.otp(), hashedPassword))
+        String hashedOtp = redisTemplate.opsForValue().get(getOtpKey(request.email())).toString();
+        if (!passwordEncoder.matches(request.otp(), hashedOtp))
             throw new CustomBadRequestException("Invalid or expired otp");
 
         user.setVerified(true);
@@ -156,20 +154,12 @@ public class AuthServiceImpl implements AuthService {
 
         sendVerificationMail(request.email(), user.getName());
 
-
     }
 
-    private void generateAndStoreOtp(OtpRequest request) {
-
-
-        String hashedOtp = passwordEncoder.encode(request.otp());
-
-        assert (hashedOtp != null);
-        redisTemplate.opsForValue().set(getOtpKey(request.email()), hashedOtp, Duration.ofMinutes(5));
-    }
 
     private void sendVerificationMail(String email, String name) {
         String otp = Helper.generateNumericOtp(6);
+        System.out.println(otp);
         generateAndStoreOtp(OtpRequest.builder()
                 .otp(otp)
                 .email(email)
@@ -187,7 +177,17 @@ public class AuthServiceImpl implements AuthService {
         }
     }
 
+    private void generateAndStoreOtp(OtpRequest request) {
+
+
+        String hashedOtp = passwordEncoder.encode(request.otp());
+
+        assert (hashedOtp != null);
+        redisTemplate.opsForValue().set(getOtpKey(request.email()), hashedOtp, Duration.ofMinutes(5));
+    }
+
     private String getOtpKey(String email) {
         return "otp::".concat(email);
     }
+
 }

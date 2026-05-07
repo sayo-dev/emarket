@@ -1,11 +1,11 @@
 package org.example.e_market.services.auth;
 
-import org.example.e_market.dto.*;
+import org.example.e_market.dto.request.*;
 import org.example.e_market.utils.TokenPair;
 
 public interface AuthService {
 
-    void registerCustomer(RegisterCustomerRequest request);
+    void registerAccount(RegisterAccountRequest request);
 
     void registerVendor(RegisterVendorRequest request);
 

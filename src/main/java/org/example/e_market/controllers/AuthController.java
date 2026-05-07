@@ -3,7 +3,7 @@ package org.example.e_market.controllers;
 import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.e_market.dto.*;
+import org.example.e_market.dto.request.*;
 import org.example.e_market.services.auth.AuthService;
 import org.example.e_market.utils.ApiResponse;
 import org.example.e_market.utils.TokenPair;
@@ -23,9 +23,9 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register/customer")
-    public ResponseEntity<ApiResponse<String>> registerCustomer(@Valid @RequestBody RegisterCustomerRequest request) {
+    public ResponseEntity<ApiResponse<String>> registerCustomer(@Valid @RequestBody RegisterAccountRequest request) {
 
-        authService.registerCustomer(request);
+        authService.registerAccount(request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Customer created successfully", null));
 

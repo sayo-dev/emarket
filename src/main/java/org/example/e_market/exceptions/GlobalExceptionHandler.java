@@ -107,6 +107,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleSecurityOrGeneral(Exception ex) {
         System.out.println(ex.getMessage());
+        System.out.println(ex.getCause());
+        System.out.println(ex.toString());
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "An unexpected error occurred on the server."

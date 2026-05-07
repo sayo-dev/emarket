@@ -28,11 +28,11 @@ spring:
 
 
   mail:
-    #    host: smtp.gmail.com
-    host: sandbox.smtp.mailtrap.io
+    host: smtp.gmail.com
+#    host: sandbox.smtp.mailtrap.io
     password: ${MAIL_PASSWORD}
     username: ${MAIL_USERNAME}
-    port: 465
+    port: 587
     properties:
       mail:
         smtp:

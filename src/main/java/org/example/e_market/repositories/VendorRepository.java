@@ -2,7 +2,10 @@ package org.example.e_market.repositories;
 
 import org.example.e_market.entity.vendor.Vendor;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-public interface VendorRepository extends JpaRepository<Vendor, Long> {
+import java.util.UUID;
+
+public interface VendorRepository extends JpaRepository<Vendor, UUID>, JpaSpecificationExecutor<Vendor> {
 
 }
