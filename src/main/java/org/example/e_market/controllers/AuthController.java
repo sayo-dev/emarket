@@ -3,10 +3,10 @@ package org.example.e_market.controllers;
 import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.example.e_market.dto.request.*;
-import org.example.e_market.services.auth.AuthService;
-import org.example.e_market.utils.ApiResponse;
-import org.example.e_market.utils.TokenPair;
+import org.example.e_market.dto.requests.*;
+import org.example.e_market.services.AuthService;
+import org.example.e_market.common.ApiResponse;
+import org.example.e_market.common.TokenPair;
 import org.example.e_market.utils.views.OtpView;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +32,7 @@ public class AuthController {
     }
 
     @PostMapping("/register/vendor")
-    public ResponseEntity<ApiResponse<String>> registerVendor(@Valid @RequestBody RegisterVendorRequest request) {
+    public ResponseEntity<ApiResponse<String>> registerVendor(@Valid @RequestBody VendorRequest request) {
 
         authService.registerVendor(request);
 

@@ -1,12 +1,12 @@
 package org.example.e_market.controllers;
 
 import lombok.RequiredArgsConstructor;
-import org.example.e_market.dto.response.VendorResponse;
-import org.example.e_market.entity.enums.VendorStatus;
-import org.example.e_market.services.admin.AdminService;
-import org.example.e_market.utils.ApiResponse;
+import org.example.e_market.common.PageResponse;
+import org.example.e_market.dto.responses.VendorResponse;
+import org.example.e_market.entities.enums.VendorStatus;
+import org.example.e_market.services.AdminService;
+import org.example.e_market.common.ApiResponse;
 import org.example.e_market.utils.filters.VendorFilter;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -22,17 +22,17 @@ public class AdminController {
     private final AdminService adminService;
 
 
-    @PatchMapping("/vendors/{vendorId}/status")
-    public ResponseEntity<ApiResponse<String>> updateVendorStatus(@PathVariable UUID vendorId,
-                                                                  @RequestParam VendorStatus status) {
+//    @PatchMapping("/vendors/{vendorId}/status")
+//    public ResponseEntity<ApiResponse<String>> updateVendorStatus(@PathVariable String vendorId,
+//                                                                  @RequestParam VendorStatus status) {
+//
+//        adminService.updateVendorStatus(vendorId, status);
+//        return ResponseEntity.ok().body(ApiResponse.success("Status update successful", null));
 
-        adminService.updateVendorStatus(vendorId, status);
-        return ResponseEntity.ok().body(ApiResponse.success("Status update successful", null));
-
-    }
+//    }
 
     @GetMapping("/vendors/all")
-    public ResponseEntity<ApiResponse<Page<VendorResponse>>> getAllVendors(
+    public ResponseEntity<ApiResponse<PageResponse<VendorResponse>>> getAllVendors(
 
             @RequestParam(required = false) String businessName,
             @RequestParam(required = false) VendorStatus status,
@@ -46,7 +46,7 @@ public class AdminController {
                 .status(status)
                 .build();
 
-        Page<VendorResponse> allVendors = adminService.getAllVendors(vendorFilter, page, size, sortBy, sortDir);
+        PageResponse<VendorResponse> allVendors = adminService.getAllVendors(vendorFilter, page, size, sortBy, sortDir);
         return ResponseEntity.ok(ApiResponse.success("Request successful", allVendors));
     }
 

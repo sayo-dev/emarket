@@ -1,10 +1,15 @@
 package org.example.e_market.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import org.example.e_market.utils.TokenPair;
+import io.jsonwebtoken.security.SignatureException;
+import org.example.e_market.common.TokenPair;
+import org.example.e_market.exceptions.UnauthorizedException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -30,18 +35,18 @@ public class JwtService {
     private long refreshExpiration;
 
 
-    public TokenPair generateTokenPair(Authentication authentication, String accountType, UUID vendorId) {
+    public TokenPair generateTokenPair(Authentication authentication, String accountType, String vendorId) {
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         return buildTokenPair(userDetails.getUsername(), accountType, vendorId);
     }
 
-    public TokenPair generateTokenPair(UserDetails userDetails, String accountType, UUID vendorId) {
+    public TokenPair generateTokenPair(UserDetails userDetails, String accountType, String vendorId) {
 
         return buildTokenPair(userDetails.getUsername(), accountType, vendorId);
     }
 
-    private TokenPair buildTokenPair(String username, String accountType, UUID vendorId) {
+    private TokenPair buildTokenPair(String username, String accountType, String vendorId) {
 
         String accessToken = generateAccessToken(username, accountType, vendorId);
         String refreshToken = generateRefreshToken(username);
@@ -57,7 +62,7 @@ public class JwtService {
         return generateToken(username, refreshExpiration, Map.of());
     }
 
-    public String generateAccessToken(String username, String accountType, UUID vendorId) {
+    public String generateAccessToken(String username, String accountType, String vendorId) {
 
         Map<String, Object> claims = new HashMap<>();
 
@@ -111,12 +116,23 @@ public class JwtService {
     }
 
     private Claims extractClaims(String token) {
-        return Jwts.parser()
-                .verifyWith(signKey())
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
-
+        try {
+            return Jwts.parser()
+                    .verifyWith(signKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+        } catch (final ExpiredJwtException e) {
+            throw new UnauthorizedException("Token has expired");
+        } catch (final UnsupportedOperationException e) {
+            throw new UnauthorizedException("Token is not signed");
+        } catch (final MalformedJwtException e) {
+            throw new UnauthorizedException("Token is malformed");
+        } catch (final SecurityException e) {
+            throw new UnauthorizedException("Invalid JWT Signature");
+        } catch (final IllegalArgumentException e) {
+            throw new UnauthorizedException("JWT claims string is empty");
+        }
     }
 
     private SecretKey signKey() {

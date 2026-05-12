@@ -1,7 +1,8 @@
 package org.example.e_market.security;
 
 import lombok.RequiredArgsConstructor;
-import org.example.e_market.entity.User;
+import lombok.extern.slf4j.Slf4j;
+import org.example.e_market.entities.User;
 import org.example.e_market.exceptions.CustomNotFoundException;
 import org.example.e_market.repositories.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class CustomUserDetailService implements UserDetailsService {
 
     private final UserRepository userRepository;
@@ -19,7 +21,9 @@ public class CustomUserDetailService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
         User user = userRepository.findByEmailIgnoreCase(username).orElseThrow(()
-                -> new CustomNotFoundException("User not found"));
+                ->
+                new CustomNotFoundException("User not found")
+        );
 
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getEmail())

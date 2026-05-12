@@ -1,7 +1,7 @@
 package org.example.e_market.utils.filters;
 
 import lombok.*;
-import org.example.e_market.entity.enums.VendorStatus;
+import org.example.e_market.entities.enums.VendorStatus;
 
 @Value
 @Builder

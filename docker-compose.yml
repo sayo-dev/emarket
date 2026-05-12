@@ -1,0 +1,38 @@
+services:
+  db:
+    image: postgres:alpine
+    container_name: emarket-db
+    environment:
+      POSTGRES_DB: ${DB_NAME:-emarket-db}
+      POSTGRES_USER: ${DB_USER:-emarket}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-emarket}
+      PGDATA: /var/lib/postgresql/data/data
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/Lib/postgresql/data/data
+    networks:
+      - emarket-app-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:alpine
+    container_name: emarket-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - emarket-app-network
+    restart: unless-stopped
+    command: [ "redis-server", "--appendonly", "yes" ]
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  emarket-app-network:
+    driver: bridge

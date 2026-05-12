@@ -1,7 +1,7 @@
 package org.example.e_market.utils.specifications;
 
 import jakarta.persistence.criteria.Predicate;
-import org.example.e_market.entity.vendor.Vendor;
+import org.example.e_market.entities.vendor.Vendor;
 import org.example.e_market.utils.filters.VendorFilter;
 import org.springframework.data.jpa.domain.Specification;
 

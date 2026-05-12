@@ -8,37 +8,57 @@ spring:
   data:
     redis:
       host: localhost
-      port: 6380
+      port: 6379
 
   datasource:
-    url: ${DB_URL}
-    password: ${DB_PASSWORD}
-    username: ${DB_USERNAME}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:emarket-db}
+    password: ${DB_PASSWORD:emarket}
+    username: ${DB_USER:emarket}
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: true
     properties:
       hibernate:
         default_schema: public
         format_sql: true
+        use_sql_comments: true
+        jdbc:
+          batch_size: 10
+        order_inserts: true
+        order_updates: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    schemas: public
+    table: flyway_schema_history
+    validate-on-migrate: true
+    locations:
+      - classpath:db/migration/common
+      - classpath:db/migration/common
+
 
 
   mail:
     host: smtp.gmail.com
-#    host: sandbox.smtp.mailtrap.io
+    #    host: sandbox.smtp.mailtrap.io
     password: ${MAIL_PASSWORD}
     username: ${MAIL_USERNAME}
-    port: 587
+    port: 465
     properties:
       mail:
         smtp:
           auth: true
           starttls:
             enable: true
+  mvc:
+    problemdetails:
+      enabled: true
 
 app:
   security:
