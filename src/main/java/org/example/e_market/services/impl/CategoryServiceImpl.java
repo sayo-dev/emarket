@@ -5,10 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.e_market.dto.requests.CreateCategoryRequest;
 import org.example.e_market.dto.responses.CategoryResponse;
 import org.example.e_market.entities.Category;
+import org.example.e_market.exceptions.CustomConflictException;
 import org.example.e_market.exceptions.CustomNotFoundException;
 import org.example.e_market.mapper.CategoryMapper;
 import org.example.e_market.repositories.CategoryRepository;
 import org.example.e_market.services.CategoryService;
+import org.example.e_market.services.AuditLogService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,9 +24,14 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
+    private final AuditLogService auditLogService;
 
     @Override
     public CategoryResponse createCategory(CreateCategoryRequest request) {
+
+        if (categoryRepository.existsByNameIgnoreCase(request.name()))
+            throw new CustomConflictException("Category already created");
+
         Category parent = null;
         if (request.parentCategoryId() != null) {
             parent = categoryRepository.findById(request.parentCategoryId())
@@ -37,6 +44,7 @@ public class CategoryServiceImpl implements CategoryService {
                 .build();
 
         category = categoryRepository.save(category);
+        auditLogService.log("CREATE_CATEGORY", "Category", category.getId(), null);
         return categoryMapper.toResponse(category);
     }
 
@@ -54,6 +62,7 @@ public class CategoryServiceImpl implements CategoryService {
         category.setName(request.name());
         category.setParentCategory(parent);
         category = categoryRepository.save(category);
+        auditLogService.log("UPDATE_CATEGORY", "Category", category.getId(), null);
         return categoryMapper.toResponse(category);
     }
 
@@ -62,10 +71,11 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new CustomNotFoundException("Category not found"));
         categoryRepository.delete(category);
+        auditLogService.log("DELETE_CATEGORY", "Category", id, null);
     }
 
     @Override
-    public List<CategoryResponse> getCategoryTree() {
+    public List<CategoryResponse> getCategories() {
         List<Category> allCategories = categoryRepository.findAll();
 
         Map<Long, List<Category>> byParentId = allCategories.stream()

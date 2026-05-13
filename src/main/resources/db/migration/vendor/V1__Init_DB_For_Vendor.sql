@@ -1,17 +1,6 @@
-CREATE TABLE categories
-(
-    id                 BIGINT PRIMARY KEY,
-    created_at         TIMESTAMP NOT NULL,
-    updated_at         TIMESTAMP,
-    deleted            BOOLEAN   NOT NULL DEFAULT FALSE,
-    name               VARCHAR(255),
-    parent_category_id BIGINT,
-    CONSTRAINT fk_categories_parent FOREIGN KEY (parent_category_id) REFERENCES categories (id)
-);
-
 CREATE TABLE products
 (
-    id             BIGINT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     created_at     TIMESTAMP NOT NULL,
     updated_at     TIMESTAMP,
     deleted        BOOLEAN   NOT NULL DEFAULT FALSE,
@@ -27,33 +16,35 @@ CREATE TABLE products
 
 CREATE TABLE product_images
 (
-    id         BIGINT PRIMARY KEY,
-    created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP,
-    deleted    BOOLEAN   NOT NULL DEFAULT FALSE,
-    product_id BIGINT,
-    image_url  VARCHAR(255),
-    is_main    BOOLEAN            DEFAULT FALSE,
+    id            BIGSERIAL PRIMARY KEY,
+    created_at    TIMESTAMP NOT NULL,
+    updated_at    TIMESTAMP,
+    deleted       BOOLEAN   NOT NULL DEFAULT FALSE,
+    product_id    BIGINT,
+    image_url     VARCHAR(255),
+    is_primary    BOOLEAN            DEFAULT FALSE,
+    display_order INTEGER,
     CONSTRAINT fk_product_images_product FOREIGN KEY (product_id) REFERENCES products (id)
 );
 
 CREATE TABLE product_variants
 (
-    id               BIGINT PRIMARY KEY,
-    created_at       TIMESTAMP NOT NULL,
-    updated_at       TIMESTAMP,
-    deleted          BOOLEAN   NOT NULL DEFAULT FALSE,
-    product_id       BIGINT,
-    name             VARCHAR(255),
-    value            VARCHAR(255),
-    price_adjustment DECIMAL(19, 2),
-    stock_quantity   INTEGER,
+    id BIGSERIAL PRIMARY KEY,
+    created_at     TIMESTAMP NOT NULL,
+    updated_at     TIMESTAMP,
+    deleted        BOOLEAN   NOT NULL DEFAULT FALSE,
+    product_id     BIGINT,
+    name           VARCHAR(255),
+    sku            VARCHAR(255) UNIQUE,
+    price_modifier DECIMAL(19, 2),
+    stock_quantity INTEGER,
+    reserved_quantity INTEGER,
     CONSTRAINT fk_product_variants_product FOREIGN KEY (product_id) REFERENCES products (id)
 );
 
 CREATE TABLE vendor_payouts
 (
-    id           BIGINT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     created_at   TIMESTAMP NOT NULL,
     updated_at   TIMESTAMP,
     deleted      BOOLEAN   NOT NULL DEFAULT FALSE,
@@ -67,7 +58,7 @@ CREATE TABLE vendor_payouts
 
 CREATE TABLE orders
 (
-    id                  BIGINT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     created_at          TIMESTAMP NOT NULL,
     updated_at          TIMESTAMP,
     deleted             BOOLEAN   NOT NULL DEFAULT FALSE,
@@ -83,7 +74,7 @@ CREATE TABLE orders
 
 CREATE TABLE order_items
 (
-    id                 BIGINT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     created_at         TIMESTAMP NOT NULL,
     updated_at         TIMESTAMP,
     deleted            BOOLEAN   NOT NULL DEFAULT FALSE,
@@ -102,7 +93,7 @@ CREATE TABLE order_items
 
 CREATE TABLE shipping_info
 (
-    id                    BIGINT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     created_at            TIMESTAMP NOT NULL,
     updated_at            TIMESTAMP,
     deleted               BOOLEAN   NOT NULL DEFAULT FALSE,
@@ -121,7 +112,7 @@ CREATE TABLE shipping_info
 
 CREATE TABLE carts
 (
-    id         BIGINT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP,
     deleted    BOOLEAN   NOT NULL DEFAULT FALSE,
@@ -130,7 +121,7 @@ CREATE TABLE carts
 
 CREATE TABLE cart_items
 (
-    id                 BIGINT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     created_at         TIMESTAMP NOT NULL,
     updated_at         TIMESTAMP,
     deleted            BOOLEAN   NOT NULL DEFAULT FALSE,
@@ -144,7 +135,7 @@ CREATE TABLE cart_items
 
 CREATE TABLE reviews
 (
-    id                   BIGINT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     created_at           TIMESTAMP NOT NULL,
     updated_at           TIMESTAMP,
     deleted              BOOLEAN   NOT NULL DEFAULT FALSE,
@@ -162,7 +153,7 @@ CREATE TABLE reviews
 
 CREATE TABLE disputes
 (
-    id                BIGINT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     created_at        TIMESTAMP NOT NULL,
     updated_at        TIMESTAMP,
     deleted           BOOLEAN   NOT NULL DEFAULT FALSE,
@@ -173,11 +164,11 @@ CREATE TABLE disputes
     description       TEXT,
     resolution_notes  TEXT,
     status            VARCHAR(255)       DEFAULT 'OPEN',
-    resolved_by       VARCHAR(255),
+    resolved_by_id    VARCHAR(255),
     resolved_at       TIMESTAMP,
     CONSTRAINT fk_disputes_order FOREIGN KEY (order_id) REFERENCES orders (id),
     CONSTRAINT fk_disputes_user FOREIGN KEY (raised_by_user_id) REFERENCES users (id),
     CONSTRAINT fk_disputes_vendor FOREIGN KEY (vendor_id) REFERENCES vendors (id),
-    CONSTRAINT fk_disputes_resolved_by FOREIGN KEY (resolved_by) REFERENCES users (id)
+    CONSTRAINT fk_disputes_resolved_by FOREIGN KEY (resolved_by_id) REFERENCES users (id)
 );
 

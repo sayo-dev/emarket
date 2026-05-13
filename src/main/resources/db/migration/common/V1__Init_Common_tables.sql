@@ -38,7 +38,7 @@ CREATE TABLE platform_config
 
 CREATE TABLE audit_logs
 (
-    id          BIGINT PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     created_at  TIMESTAMP NOT NULL,
     updated_at  TIMESTAMP,
     deleted     BOOLEAN   NOT NULL DEFAULT FALSE,
@@ -48,4 +48,15 @@ CREATE TABLE audit_logs
     entity_id   BIGINT,
     metadata JSONB,
     CONSTRAINT fk_audit_logs_user FOREIGN KEY (user_id) REFERENCES users (id)
+);
+
+CREATE TABLE categories
+(
+    id BIGSERIAL PRIMARY KEY,
+    created_at         TIMESTAMP NOT NULL,
+    updated_at         TIMESTAMP,
+    deleted            BOOLEAN   NOT NULL DEFAULT FALSE,
+    name               VARCHAR(255),
+    parent_category_id BIGINT,
+    CONSTRAINT fk_categories_parent FOREIGN KEY (parent_category_id) REFERENCES categories (id)
 );

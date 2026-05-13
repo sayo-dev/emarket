@@ -7,7 +7,7 @@ import org.example.e_market.common.PageResponse;
 import org.example.e_market.dto.requests.CreateProductRequest;
 import org.example.e_market.dto.requests.CreateVariantRequest;
 import org.example.e_market.dto.responses.ProductResponse;
-import org.example.e_market.entities.AuditLog;
+import org.example.e_market.services.AuditLogService;
 import org.example.e_market.entities.Category;
 import org.example.e_market.entities.product.Product;
 import org.example.e_market.entities.product.ProductImage;
@@ -17,16 +17,23 @@ import org.example.e_market.exceptions.CustomBadRequestException;
 import org.example.e_market.exceptions.CustomNotFoundException;
 import org.example.e_market.mapper.ProductMapper;
 import org.example.e_market.repositories.*;
+import org.example.e_market.services.CloudinaryService;
 import org.example.e_market.services.ProductService;
 import org.example.e_market.utils.filters.ProductFilter;
 import org.example.e_market.utils.specifications.ProductSpecification;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -37,9 +44,10 @@ public class ProductServiceImpl implements ProductService {
     private final ProductVariantRepository productVariantRepository;
     private final ProductImageRepository productImageRepository;
     private final CategoryRepository categoryRepository;
-    private final AuditLogRepository auditLogRepository;
+    private final AuditLogService auditLogService;
     private final CurrentUserUtil currentUserUtil;
     private final ProductMapper productMapper;
+    private final CloudinaryService cloudinaryService;
 
     @Transactional
     @Override
@@ -63,11 +71,13 @@ public class ProductServiceImpl implements ProductService {
                     .product(product)
                     .sku(vr.sku())
                     .name(vr.name())
-                    .priceDecimal(vr.priceDecimal())
+                    .priceModifier(vr.priceModifier())
                     .stockQuantity(vr.stockQuantity())
                     .build();
             productVariantRepository.save(variant);
         }
+
+        auditLogService.log("CREATE_PRODUCT", "Product", product.getId(), null);
 
         return productMapper.toResponse(product,
                 productVariantRepository.findByProduct(product),
@@ -75,24 +85,39 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void addImage(Long productId, String imageUrl, boolean isPrimary) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new CustomNotFoundException("Product not found"));
+    public void addImage(Long productId, MultipartFile file, boolean isPrimary) {
+        Map uploadResult = upload(file);
+        String imageUrl = uploadResult.get("secure_url").toString();
+        String publicId = uploadResult.get("public_id").toString();
 
-        if (isPrimary) {
-            List<ProductImage> primaries = productImageRepository.findByProductAndIsPrimaryTrue(product);
-            for (ProductImage img : primaries) {
-                img.setPrimary(false);
-                productImageRepository.save(img);
+        try {
+            Product product = productRepository.findById(productId)
+                    .orElseThrow(() -> new CustomNotFoundException("Product not found"));
+
+            if (isPrimary) {
+                List<ProductImage> primaries = productImageRepository.findByProductAndIsPrimaryTrue(product);
+                for (ProductImage img : primaries) {
+                    img.setPrimary(false);
+                    productImageRepository.save(img);
+                }
             }
-        }
 
-        ProductImage image = ProductImage.builder()
-                .product(product)
-                .imageUrl(imageUrl)
-                .isPrimary(isPrimary)
-                .build();
-        productImageRepository.save(image);
+            ProductImage image = ProductImage.builder()
+                    .product(product)
+                    .imageUrl(imageUrl)
+                    .isPrimary(isPrimary)
+                    .build();
+            productImageRepository.save(image);
+            auditLogService.log("ADD_IMAGE", "Product", productId, "{\"imageUrl\":\"" + imageUrl + "\"}");
+        } catch (Exception e) {
+            log.error("Failed to add image to product, deleting from Cloudinary", e);
+            try {
+                cloudinaryService.delete(publicId);
+            } catch (IOException ioException) {
+                log.error("Failed to delete image from Cloudinary after error", ioException);
+            }
+            throw e;
+        }
     }
 
     @Override
@@ -105,6 +130,7 @@ public class ProductServiceImpl implements ProductService {
         }
 
         productImageRepository.delete(image);
+        auditLogService.log("REMOVE_IMAGE", "Product", image.getProduct().getId(), "{\"imageId\":" + imageId + "}");
     }
 
     @Override
@@ -121,6 +147,7 @@ public class ProductServiceImpl implements ProductService {
 
         product.setProductStatus(ProductStatus.ACTIVE);
         productRepository.save(product);
+        auditLogService.log("PUBLISH_PRODUCT", "Product", productId, null);
     }
 
     @Override
@@ -131,14 +158,7 @@ public class ProductServiceImpl implements ProductService {
         variant.setStockQuantity(variant.getStockQuantity() + quantity);
         productVariantRepository.save(variant);
 
-        AuditLog auditLog = AuditLog.builder()
-                .user(currentUserUtil.getCurrentUser())
-                .action("UPDATE_STOCK")
-                .entityType("ProductVariant")
-                .entityId(variant.getId())
-                .metadata("{\"reason\":\"" + reason + "\"}")
-                .build();
-        auditLogRepository.save(auditLog);
+        auditLogService.log("UPDATE_STOCK", "ProductVariant", variantId, "{\"reason\":\"" + reason + "\",\"quantity\":" + quantity + "}");
     }
 
     @Override
@@ -148,14 +168,18 @@ public class ProductServiceImpl implements ProductService {
 
         product.setDeleted(true);
         productRepository.save(product);
+        auditLogService.log("DELETE_PRODUCT", "Product", productId, null);
     }
 
     @Override
-    public PageResponse<ProductResponse> searchProducts(ProductFilter filter, Pageable pageable) {
+    public PageResponse<ProductResponse> searchProducts(ProductFilter filter, int page, int size, String sortBy,
+            String sortDir) {
+        Sort sort = sortDir.equalsIgnoreCase("DESC") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
+        Pageable pageable = PageRequest.of(page, size, sort);
         Specification<Product> spec = ProductSpecification.filter(filter);
 
-        Page<Product> page = productRepository.findAll(spec, pageable);
-        return PageResponse.of(page.map(p -> productMapper.toResponse(p,
+        Page<Product> result = productRepository.findAll(spec, pageable);
+        return PageResponse.of(result.map(p -> productMapper.toResponse(p,
                 productVariantRepository.findByProduct(p),
                 productImageRepository.findByProduct(p))));
     }
@@ -167,5 +191,18 @@ public class ProductServiceImpl implements ProductService {
         return productMapper.toResponse(product,
                 productVariantRepository.findByProduct(product),
                 productImageRepository.findByProduct(product));
+    }
+
+    private Map upload(MultipartFile file) {
+
+        if (file.isEmpty() || !Objects.requireNonNull(file.getContentType()).startsWith("image/"))
+            throw new IllegalArgumentException("File must not be empty and must a valid type.");
+
+        try {
+            return cloudinaryService.upload(file);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 }

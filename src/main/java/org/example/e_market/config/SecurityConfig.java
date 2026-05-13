@@ -35,8 +35,6 @@ public class SecurityConfig {
 
     private final String[] WHITE_LIST = {
             "/api/v1/auth/**",
-            "/api/v1/admin/**",
-            "/api/v1/vendor/**",
 
             "/v2/api-docs",
             "/v3/api-docs",
@@ -74,9 +72,17 @@ public class SecurityConfig {
         httpSecurity
                 .cors(cors -> cors.configurationSource(configurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth ->
+                        auth.requestMatchers(WHITE_LIST).permitAll()
+                                .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(request -> request.requestMatchers(WHITE_LIST).permitAll()
-                        .anyRequest().authenticated())
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(401);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"message\":\"Please sign in to continue\"}");
+                        })
+                )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .authenticationProvider(authProvider());
 

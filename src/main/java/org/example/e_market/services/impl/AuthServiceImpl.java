@@ -159,8 +159,14 @@ public class AuthServiceImpl implements AuthService {
 
     private void sendVerificationMail(String email, String name) {
         String otp = Helper.generateNumericOtp(6);
-        System.out.println(otp);
-        generateAndStoreOtp(OtpRequest.builder().otp(otp).email(email).purpose(OtpPurpose.EMAIL_VERIFICATION).build());
+        log.info("Verification code {}", otp);
+
+        OtpRequest request =
+                OtpRequest.builder().otp(otp).email(email).purpose(OtpPurpose.EMAIL_VERIFICATION).build();
+        String hashedOtp = passwordEncoder.encode(request.otp());
+
+        assert (hashedOtp != null);
+        redisTemplate.opsForValue().set(getOtpKey(request.email()), hashedOtp, Duration.ofMinutes(5));
 
         try {
 
@@ -170,13 +176,6 @@ public class AuthServiceImpl implements AuthService {
             log.debug(ex.getMessage());
             throw new RuntimeException(ex);
         }
-    }
-
-    private void generateAndStoreOtp(OtpRequest request) {
-        String hashedOtp = passwordEncoder.encode(request.otp());
-
-        assert (hashedOtp != null);
-        redisTemplate.opsForValue().set(getOtpKey(request.email()), hashedOtp, Duration.ofMinutes(5));
     }
 
     private String getOtpKey(String email) {

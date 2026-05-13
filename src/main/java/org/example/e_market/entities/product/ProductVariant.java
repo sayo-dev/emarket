@@ -28,7 +28,7 @@ public class ProductVariant extends AbstractEntity {
 
     private String name;
 
-    private BigDecimal priceDecimal;
+    private BigDecimal priceModifier;
 
     private Integer stockQuantity;
 

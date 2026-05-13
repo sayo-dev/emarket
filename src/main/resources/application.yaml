@@ -22,7 +22,7 @@ spring:
     show-sql: true
     properties:
       hibernate:
-#        default_schema: public
+        #        default_schema: public
         format_sql: true
         use_sql_comments: true
         jdbc:
@@ -66,3 +66,8 @@ app:
       secret-key: ${JWT_SECRET_KEY}
       jwt-expiration: 3600000
       refresh-expiration: 604800000
+
+  cloudinary:
+    cloud-name: ${CLOUDINARY_CLOUD_NAME}
+    api-key: ${CLOUDINARY_API_KEY}
+    secret-key: ${CLOUDINARY_SECRET_KEY}

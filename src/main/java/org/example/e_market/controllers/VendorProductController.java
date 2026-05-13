@@ -9,23 +9,27 @@ import org.example.e_market.services.ProductService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/v1/vendor/products")
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyRole('VENDOR_ADMIN', 'VENDOR_STAFF')")
+@PreAuthorize("hasAnyRole('VENDOR_ADMIN', 'VENDOR_STAFF') and @vendorSecurity.isActive()")
 public class VendorProductController {
 
     private final ProductService productService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<ProductResponse>> createProduct(@Valid @RequestBody CreateProductRequest request) {
-        return ResponseEntity.ok(ApiResponse.success("Product created successfully", productService.createProduct(request)));
+    public ResponseEntity<ApiResponse<ProductResponse>> createProduct(
+            @Valid @RequestBody CreateProductRequest request) {
+        return ResponseEntity
+                .ok(ApiResponse.success("Product created successfully", productService.createProduct(request)));
     }
 
     @PostMapping("/{id}/images")
-    public ResponseEntity<ApiResponse<Void>> addImage(@PathVariable Long id, @RequestParam String imageUrl, @RequestParam boolean isPrimary) {
-        productService.addImage(id, imageUrl, isPrimary);
+    public ResponseEntity<ApiResponse<Void>> addImage(@PathVariable Long id, @RequestParam("file") MultipartFile file,
+            @RequestParam boolean isPrimary) {
+        productService.addImage(id, file, isPrimary);
         return ResponseEntity.ok(ApiResponse.success("Image added successfully", null));
     }
 
@@ -42,7 +46,8 @@ public class VendorProductController {
     }
 
     @PutMapping("/variants/{variantId}/stock")
-    public ResponseEntity<ApiResponse<Void>> updateStock(@PathVariable Long variantId, @RequestParam Integer quantity, @RequestParam(required = false) String reason) {
+    public ResponseEntity<ApiResponse<Void>> updateStock(@PathVariable Long variantId, @RequestParam Integer quantity,
+            @RequestParam(required = false) String reason) {
         productService.updateStock(variantId, quantity, reason);
         return ResponseEntity.ok(ApiResponse.success("Stock updated successfully", null));
     }

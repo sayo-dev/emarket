@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 public record CreateVariantRequest(
         @NotBlank String sku,
         @NotBlank String name,
-        @NotNull @PositiveOrZero BigDecimal priceDecimal,
+        @NotNull @PositiveOrZero BigDecimal priceModifier,
         @NotNull @PositiveOrZero Integer stockQuantity
 ) {
 }

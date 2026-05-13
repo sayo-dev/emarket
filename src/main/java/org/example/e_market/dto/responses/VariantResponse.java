@@ -11,7 +11,7 @@ public class VariantResponse {
     Long id;
     String sku;
     String name;
-    BigDecimal priceDecimal;
+    BigDecimal priceModifier;
     Integer stockQuantity;
     Integer reservedQuantity;
 }

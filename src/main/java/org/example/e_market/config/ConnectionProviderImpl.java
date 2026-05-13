@@ -36,15 +36,16 @@ public class ConnectionProviderImpl implements MultiTenantConnectionProvider<Str
 
         try {
             if (tenantIdentifier != null && !tenantIdentifier.equals("public")) {
-                connection.createStatement().execute("SET search_path TO \"" + tenantIdentifier + "\", public");
+                connection.createStatement().execute("SET search_path TO " + tenantIdentifier + ", public");
                 log.trace("Set search_path to {}", tenantIdentifier);
             }
         } catch (Exception e) {
-            log.error("Error creating search_path", e);
-            throw e;
+            log.warn("Error setting search_path to {}. Falling back to public. Error: {}", tenantIdentifier,
+                    e.getMessage());
+            releaseConnection(tenantIdentifier, connection);
         }
-
         return connection;
+
     }
 
     @Override

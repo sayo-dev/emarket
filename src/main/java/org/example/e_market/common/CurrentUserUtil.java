@@ -31,12 +31,6 @@ public class CurrentUserUtil {
                 });
     }
 
-    public String getVendorIdByEmail(String email) {
-        return userRepository.findByEmailIgnoreCase(email)
-                .map(user -> user.getVendor() != null ? user.getVendor().getId() : null)
-                .orElse(null);
-    }
-
     public String getCurrentVendorId() {
         return getCurrentUser().getVendor().getId();
     }

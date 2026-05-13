@@ -39,7 +39,7 @@ public class ProductMapper {
                 .id(variant.getId())
                 .sku(variant.getSku())
                 .name(variant.getName())
-                .priceDecimal(variant.getPriceDecimal())
+                .priceModifier(variant.getPriceModifier())
                 .stockQuantity(variant.getStockQuantity())
                 .reservedQuantity(variant.getReservedQuantity())
                 .build();

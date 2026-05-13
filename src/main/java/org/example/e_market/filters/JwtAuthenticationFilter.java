@@ -32,34 +32,40 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final CurrentUserUtil userUtil;
     private final SchemaResolver schemaResolver;
 
+//    @Override
+//    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+//        String path = request.getServletPath();
+//        return path.startsWith("/api/v1/auth/");
+//    }
+
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,
             FilterChain filterChain) throws ServletException, IOException {
 
-
         try {
             final String jwt = extractJwtFromRequest(request);
             if (StringUtils.hasText(jwt)) {
                 final String userEmail = jwtService.extractUsername(jwt);
+                final String vendorId = jwtService.extractVendorId(jwt);
                 if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
                     if (jwtService.isTokenValid(jwt, userDetails)) {
-                        String vendorId = userUtil.getVendorIdByEmail(userEmail);
+
                         if (vendorId != null) {
                             VendorContext.setVendor(vendorId);
                             final String schema = schemaResolver.resolveSchema(vendorId);
                             VendorContext.setSchema(schema);
                         }
                         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                                userDetails, null, userDetails.getAuthorities()
-                        );
+                                userDetails, null, userDetails.getAuthorities());
 
                         authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                         SecurityContextHolder.getContext().setAuthentication(authToken);
-                        log.debug("User authenticated for user Email: {}, vendor ID: {} and role: {}", userDetails.getUsername(),
+                        log.debug("User authenticated for user Email: {}, vendor ID: {} and role: {}",
+                                userDetails.getUsername(),
                                 vendorId,
                                 userDetails.getAuthorities());
                     }

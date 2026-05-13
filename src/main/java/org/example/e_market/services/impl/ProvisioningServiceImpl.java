@@ -22,7 +22,7 @@ public class ProvisioningServiceImpl implements ProvisioningService {
     @Override
     public void provisionVendor(final Vendor vendor) {
 
-        final String schemaName = "vendor_" + vendor.getId();
+        final String schemaName = "vendor_" + vendor.getId().replaceAll("-", "_");
 
         try {
             log.info("Provisioning vendor: {}  (schema: {})", vendor.getBusinessName(), schemaName);

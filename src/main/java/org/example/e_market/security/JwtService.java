@@ -93,6 +93,12 @@ public class JwtService {
     }
 
 
+    public String extractVendorId(String token) {
+
+        Claims claims = extractClaims(token);
+        return claims.get("vendorId", String.class);
+    }
+
     public String extractUsername(String token) {
 
         Claims claims = extractClaims(token);

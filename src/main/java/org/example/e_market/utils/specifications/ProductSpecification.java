@@ -14,24 +14,24 @@ public class ProductSpecification {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if (filter.name() != null) {
-                predicates.add(cb.like(cb.lower(root.get("name")), "%" + filter.name().toLowerCase() + "%"));
+            if (filter.getName() != null) {
+                predicates.add(cb.like(cb.lower(root.get("name")), "%" + filter.getName().toLowerCase() + "%"));
             }
 
-            if (filter.categoryId() != null) {
-                predicates.add(cb.equal(root.get("category").get("id"), filter.categoryId()));
+            if (filter.getCategoryId() != null) {
+                predicates.add(cb.equal(root.get("category").get("id"), filter.getCategoryId()));
             }
 
-            if (filter.minPrice() != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("basePrice"), filter.minPrice()));
+            if (filter.getMinPrice() != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("basePrice"), filter.getMinPrice()));
             }
 
-            if (filter.maxPrice() != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("basePrice"), filter.maxPrice()));
+            if (filter.getMaxPrice() != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("basePrice"), filter.getMaxPrice()));
             }
 
-            if (filter.vendorId() != null) {
-                predicates.add(cb.equal(root.get("vendor").get("id"), filter.vendorId()));
+            if (filter.getVendorId() != null) {
+                predicates.add(cb.equal(root.get("vendor").get("id"), filter.getVendorId()));
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));

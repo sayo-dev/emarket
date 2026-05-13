@@ -22,7 +22,7 @@ public class SchemaResolver {
             return PUBLIC_SCHEMA;
         }
         try {
-            final String schemaName = "vendor_" + vendorId;
+            final String schemaName = "vendor_" + vendorId.replaceAll("-", "_");
             log.debug("Vendor schema resolved {} for vendor {}", schemaName, vendorId);
             return schemaName;
 

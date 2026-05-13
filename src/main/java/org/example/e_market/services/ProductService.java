@@ -4,13 +4,13 @@ import org.example.e_market.common.PageResponse;
 import org.example.e_market.dto.requests.CreateProductRequest;
 import org.example.e_market.dto.responses.ProductResponse;
 import org.example.e_market.utils.filters.ProductFilter;
-import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface ProductService {
 
     ProductResponse createProduct(CreateProductRequest request);
 
-    void addImage(Long productId, String imageUrl, boolean isPrimary);
+    void addImage(Long productId, MultipartFile file, boolean isPrimary);
 
     void removeImage(Long imageId);
 
@@ -20,7 +20,8 @@ public interface ProductService {
 
     void softDeleteProduct(Long productId);
 
-    PageResponse<ProductResponse> searchProducts(ProductFilter filter, Pageable pageable);
+    PageResponse<ProductResponse> searchProducts(ProductFilter filter, int page, int size, String sortBy,
+            String sortDir);
 
     ProductResponse getProductDetail(Long productId);
 }

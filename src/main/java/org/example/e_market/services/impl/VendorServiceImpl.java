@@ -16,6 +16,7 @@ import org.example.e_market.repositories.UserRepository;
 import org.example.e_market.repositories.VendorPayoutRepository;
 import org.example.e_market.repositories.VendorRepository;
 import org.example.e_market.services.VendorService;
+import org.example.e_market.services.AuditLogService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,6 +32,7 @@ public class VendorServiceImpl implements VendorService {
     private final UserRepository userRepository;
     private final CurrentUserUtil currentUserUtil;
     private final VendorMapper vendorMapper;
+    private final AuditLogService auditLogService;
 
     @Override
     public void updateStoreProfile(UpdateVendorProfileRequest request) {
@@ -43,6 +45,7 @@ public class VendorServiceImpl implements VendorService {
         vendor.setBankAccountNumber(request.bankAccountNumber());
         vendor.setBankName(request.bankName());
         vendorRepository.save(vendor);
+        auditLogService.log("UPDATE_VENDOR_PROFILE", "Vendor", null, "{\"vendorId\":\"" + vendor.getId() + "\"}");
         log.info("Updated store profile for vendor: {}", vendor.getId());
     }
 

@@ -13,5 +13,5 @@ public interface CategoryService {
 
     void deleteCategory(Long id);
 
-    List<CategoryResponse> getCategoryTree();
+    List<CategoryResponse> getCategories();
 }
