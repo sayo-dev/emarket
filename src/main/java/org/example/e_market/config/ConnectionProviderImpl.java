@@ -19,7 +19,6 @@ public class ConnectionProviderImpl implements MultiTenantConnectionProvider<Str
 
     private final DataSource dataSource;
 
-
     @Override
     public Connection getAnyConnection() throws SQLException {
         return dataSource.getConnection();
@@ -37,7 +36,7 @@ public class ConnectionProviderImpl implements MultiTenantConnectionProvider<Str
 
         try {
             if (tenantIdentifier != null && !tenantIdentifier.equals("public")) {
-                connection.createStatement().execute("SET search_path TO " + tenantIdentifier + ", public");
+                connection.createStatement().execute("SET search_path TO \"" + tenantIdentifier + "\", public");
                 log.trace("Set search_path to {}", tenantIdentifier);
             }
         } catch (Exception e) {

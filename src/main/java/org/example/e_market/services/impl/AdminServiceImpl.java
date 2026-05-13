@@ -1,6 +1,5 @@
 package org.example.e_market.services.impl;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.e_market.common.PageResponse;
@@ -38,7 +37,6 @@ public class AdminServiceImpl implements AdminService {
     private final ProvisioningService provisioningService;
 
 
-    @Transactional
     @Override
     public void approveVendor(String vendorId) {
 
@@ -47,9 +45,9 @@ public class AdminServiceImpl implements AdminService {
         if (vendor.getStatus() != VendorStatus.PENDING)
             throw new CustomBadRequestException("Vendor is not pending");
         vendor.setStatus(VendorStatus.ACTIVE);
+        vendorRepository.save(vendor);
 
         try {
-
             provisioningService.provisionVendor(vendor);
 
 
@@ -58,7 +56,6 @@ public class AdminServiceImpl implements AdminService {
         }
     }
 
-    @Transactional
     @Override
     public void suspendVendor(String vendorId) {
 
@@ -68,10 +65,10 @@ public class AdminServiceImpl implements AdminService {
             throw new CustomBadRequestException("Vendor is not active");
 
         vendor.setStatus(VendorStatus.SUSPENDED);
-
+        vendorRepository.save(vendor);
     }
 
-    @Transactional
+
     @Override
     public void updateGlobalConfig(BigDecimal rate, BigDecimal threshold, PayoutSchedule schedule) {
 
@@ -80,7 +77,7 @@ public class AdminServiceImpl implements AdminService {
         platformConfig.setPayoutSchedule(schedule);
         platformConfig.setMinPayoutThreshold(threshold);
 
-
+        platformConfigRepository.save(platformConfig);
     }
 
     @Override

@@ -40,6 +40,7 @@ public class ProvisioningServiceImpl implements ProvisioningService {
             try {
                 dropSchema(schemaName);
             } catch (Exception ex) {
+                log.error("Errpr dropping schema,", e);
                 log.error("Error dropping schema, {}", schemaName);
             }
 
@@ -68,12 +69,12 @@ public class ProvisioningServiceImpl implements ProvisioningService {
     }
 
     private void dropSchema(String schemaName) {
-        final String sql = String.format("DROP SCHEMA IF EXISTS %s", schemaName);
+        final String sql = String.format("DROP SCHEMA IF EXISTS \"%s\"", schemaName);
         jdbcTemplate.execute(sql);
     }
 
     private void createSchema(String schemaName) {
-        final String sql = String.format("CREATE SCHEMA IF NOT EXISTS %s", schemaName);
+        final String sql = String.format("CREATE SCHEMA IF NOT EXISTS \"%s\"", schemaName);
         jdbcTemplate.execute(sql);
     }
 }

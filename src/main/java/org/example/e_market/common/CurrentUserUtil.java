@@ -19,13 +19,22 @@ public class CurrentUserUtil {
     private final UserRepository userRepository;
 
     public User getCurrentUser() {
-        String email = SecurityContextHolder.getContext().getAuthentication()
-                .getName();
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null) {
+            throw new CustomNotFoundException("No active authentication found");
+        }
+        String email = auth.getName();
         return userRepository.findByEmailIgnoreCase(email)
                 .orElseThrow(() -> {
-                    log.debug("User not found in context");
+                    log.debug("User not found in context: {}", email);
                     return new CustomNotFoundException("User not found in context");
                 });
+    }
+
+    public String getVendorIdByEmail(String email) {
+        return userRepository.findByEmailIgnoreCase(email)
+                .map(user -> user.getVendor() != null ? user.getVendor().getId() : null)
+                .orElse(null);
     }
 
     public String getCurrentVendorId() {

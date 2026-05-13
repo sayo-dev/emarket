@@ -16,20 +16,25 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/v1/admin")
-@PreAuthorize(value = "hasRole('ROLE_PLATFORM_ADMIN')")
+@PreAuthorize("hasRole('PLATFORM_ADMIN')")
 public class AdminController {
 
     private final AdminService adminService;
 
 
-//    @PatchMapping("/vendors/{vendorId}/status")
-//    public ResponseEntity<ApiResponse<String>> updateVendorStatus(@PathVariable String vendorId,
-//                                                                  @RequestParam VendorStatus status) {
-//
-//        adminService.updateVendorStatus(vendorId, status);
-//        return ResponseEntity.ok().body(ApiResponse.success("Status update successful", null));
+    @PatchMapping("/vendors/approve/{vendorId}")
+    public ResponseEntity<ApiResponse<String>> approveVendor(@PathVariable String vendorId) {
 
-//    }
+        adminService.approveVendor(vendorId);
+        return ResponseEntity.ok(ApiResponse.success("Vendor approved successfully", null));
+    }
+
+    @PatchMapping("/vendors/suspend/{vendorId}")
+    public ResponseEntity<ApiResponse<String>> suspendVendor(@PathVariable String vendorId) {
+
+        adminService.suspendVendor(vendorId);
+        return ResponseEntity.ok(ApiResponse.success("Vendor suspended successfully", null));
+    }
 
     @GetMapping("/vendors/all")
     public ResponseEntity<ApiResponse<PageResponse<VendorResponse>>> getAllVendors(

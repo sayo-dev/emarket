@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.e_market.common.CurrentUserUtil;
 import org.example.e_market.config.VendorContext;
 import org.example.e_market.config.SchemaResolver;
+import org.example.e_market.exceptions.UnauthorizedException;
 import org.example.e_market.security.JwtService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -40,30 +41,35 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             final String jwt = extractJwtFromRequest(request);
-            final String userEmail = jwtService.extractUsername(jwt);
-            final String vendorId = userUtil.getCurrentVendorId();
-            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+            if (StringUtils.hasText(jwt)) {
+                final String userEmail = jwtService.extractUsername(jwt);
+                if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
-                if (jwtService.isTokenValid(jwt, userDetails)) {
+                    if (jwtService.isTokenValid(jwt, userDetails)) {
+                        String vendorId = userUtil.getVendorIdByEmail(userEmail);
+                        if (vendorId != null) {
+                            VendorContext.setVendor(vendorId);
+                            final String schema = schemaResolver.resolveSchema(vendorId);
+                            VendorContext.setSchema(schema);
+                        }
+                        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                                userDetails, null, userDetails.getAuthorities()
+                        );
 
-                    if (vendorId != null) {
-                        VendorContext.setVendor(vendorId);
+                        authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        SecurityContextHolder.getContext().setAuthentication(authToken);
+                        log.debug("User authenticated for user Email: {}, vendor ID: {} and role: {}", userDetails.getUsername(),
+                                vendorId,
+                                userDetails.getAuthorities());
                     }
-
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities()
-                    );
-
-                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
-                    log.debug("User authenticated for user Email: {}, vendor ID: {} and role: {}", userDetails.getUsername(),
-                            vendorId,
-                            userDetails.getAuthorities());
-
                 }
             }
-
+        } catch (UnauthorizedException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\": \"" + e.getMessage() + "\"}");
+            return;
         } catch (final Exception e) {
             log.error("Error authenticating user", e);
         }
