@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -71,6 +72,7 @@ public class ProductServiceImpl implements ProductService {
                     .product(product)
                     .sku(vr.sku())
                     .name(vr.name())
+                    .reservedQuantity(vr.reservedQuantity())
                     .priceModifier(vr.priceModifier())
                     .stockQuantity(vr.stockQuantity())
                     .build();
@@ -139,10 +141,15 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new CustomNotFoundException("Product not found"));
 
         List<ProductVariant> variants = productVariantRepository.findByProduct(product);
-        boolean hasStock = variants.stream().anyMatch(v -> v.getStockQuantity() > 0);
+        List<ProductVariant> zeroStockVariants = variants.stream()
+                .filter(v -> v.getStockQuantity() == null || v.getStockQuantity() <= 0)
+                .toList();
 
-        if (!hasStock) {
-            throw new CustomBadRequestException("Cannot publish product without stock");
+        if (!zeroStockVariants.isEmpty()) {
+            String variantNames = zeroStockVariants.stream()
+                    .map(v -> v.getName() != null ? v.getName() : v.getSku())
+                    .collect(Collectors.joining(", "));
+            throw new CustomBadRequestException("Cannot publish product because the following variants have zero stock: " + variantNames);
         }
 
         product.setProductStatus(ProductStatus.ACTIVE);

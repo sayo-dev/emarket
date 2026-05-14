@@ -32,11 +32,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final CurrentUserUtil userUtil;
     private final SchemaResolver schemaResolver;
 
-//    @Override
-//    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-//        String path = request.getServletPath();
-//        return path.startsWith("/api/v1/auth/");
-//    }
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getServletPath();
+        return path.startsWith("/api/v1/auth/");
+    }
 
     @Override
     protected void doFilterInternal(

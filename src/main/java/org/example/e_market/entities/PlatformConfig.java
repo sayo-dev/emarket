@@ -33,5 +33,4 @@ public class PlatformConfig {
     @Column(nullable = false, insertable = false)
     private LocalDateTime updatedAt;
 
-
 }

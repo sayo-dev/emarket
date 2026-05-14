@@ -3,6 +3,8 @@ package org.example.e_market.services.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.e_market.common.CurrentUserUtil;
+import org.example.e_market.dto.MonthlyRevenueProjection;
+import org.example.e_market.dto.VendorRevenueReportDto;
 import org.example.e_market.dto.requests.UpdateVendorProfileRequest;
 import org.example.e_market.dto.responses.PayoutResponse;
 import org.example.e_market.dto.responses.VendorResponse;
@@ -33,6 +35,7 @@ public class VendorServiceImpl implements VendorService {
     private final CurrentUserUtil currentUserUtil;
     private final VendorMapper vendorMapper;
     private final AuditLogService auditLogService;
+    private final org.example.e_market.repositories.OrderItemRepository orderItemRepository;
 
     @Override
     public void updateStoreProfile(UpdateVendorProfileRequest request) {
@@ -82,9 +85,8 @@ public class VendorServiceImpl implements VendorService {
             throw new CustomNotFoundException("Vendor profile not found for current user");
         }
 
-        User user = userRepository.findByEmailIgnoreCase(email).orElseThrow(()
-                -> new CustomNotFoundException("User not found"));
-
+        User user = userRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new CustomNotFoundException("User not found"));
 
         if (user.getAccountType() != AccountType.CUSTOMER)
             throw new CustomBadRequestException("Cannot invite user");
@@ -95,5 +97,45 @@ public class VendorServiceImpl implements VendorService {
         log.info("Invited staff {} to vendor {}", email, vendor.getId());
 
         // TODO: Send email with setup link
+    }
+
+    @Override
+    public VendorRevenueReportDto getRevenueReport() {
+        org.example.e_market.entities.vendor.Vendor vendor = currentUserUtil.getCurrentUser().getVendor();
+        if (vendor == null) {
+            throw new CustomNotFoundException("Vendor profile not found for current user");
+        }
+
+        List<MonthlyRevenueProjection> projections = orderItemRepository
+                .getVendorRevenueReport(vendor.getId());
+
+        java.math.BigDecimal totalRevenue = java.math.BigDecimal.ZERO;
+        java.math.BigDecimal totalCommissionPaid = java.math.BigDecimal.ZERO;
+        java.math.BigDecimal totalPayoutReceived = java.math.BigDecimal.ZERO;
+        List<VendorRevenueReportDto.MonthlyBreakdownDto> breakdown = new java.util.ArrayList<>();
+
+        for (MonthlyRevenueProjection p : projections) {
+            java.math.BigDecimal revenue = p.getRevenue() != null ? p.getRevenue() : java.math.BigDecimal.ZERO;
+            java.math.BigDecimal commission = p.getCommission() != null ? p.getCommission() : java.math.BigDecimal.ZERO;
+            java.math.BigDecimal payout = p.getPayout() != null ? p.getPayout() : java.math.BigDecimal.ZERO;
+
+            totalRevenue = totalRevenue.add(revenue);
+            totalCommissionPaid = totalCommissionPaid.add(commission);
+            totalPayoutReceived = totalPayoutReceived.add(payout);
+
+            breakdown.add(VendorRevenueReportDto.MonthlyBreakdownDto.builder()
+                    .month(p.getMonth())
+                    .revenue(revenue)
+                    .commission(commission)
+                    .payout(payout)
+                    .build());
+        }
+
+        return VendorRevenueReportDto.builder()
+                .totalRevenue(totalRevenue)
+                .totalCommissionPaid(totalCommissionPaid)
+                .totalPayoutReceived(totalPayoutReceived)
+                .breakdown(breakdown)
+                .build();
     }
 }

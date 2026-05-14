@@ -31,11 +31,5 @@ public class CurrentUserUtil {
                 });
     }
 
-    public String getCurrentVendorId() {
-        return getCurrentUser().getVendor().getId();
-    }
 
-    public boolean isPlatformAdmin() {
-        return getCurrentUser().getAccountType().equals(AccountType.PLATFORM_ADMIN);
-    }
 }

@@ -29,7 +29,7 @@ public class ProductMapper {
                 .vendorId(product.getVendor() != null ? product.getVendor().getId() : null)
                 .categoryName(product.getCategory() != null ? product.getCategory().getName() : null)
                 .variants(variants.stream().map(this::toVariantResponse).collect(Collectors.toList()))
-                .primaryImageUrl(primaryImage)
+                .image_url(primaryImage)
                 .averageRating(0.0)
                 .build();
     }

@@ -98,6 +98,7 @@ public class OrderServiceImpl implements OrderService {
                 .orElseGet(() -> ShippingInfo.builder().order(order).build());
 
         shippingInfo.setCourier(courier);
+        shippingInfo.setTrackingNumber(trackingNumber);
         shippingInfoRepository.save(shippingInfo);
         auditLogService.log("SHIP_ITEM", "OrderItem", itemId, "{\"trackingNumber\":\"" + trackingNumber + "\"}");
     }
@@ -182,5 +183,27 @@ public class OrderServiceImpl implements OrderService {
         LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(3);
         List<Order> orders = orderRepository.findByStatusAndCreatedAtBefore(OrderStatus.PAID, threeDaysAgo);
         return orders.stream().map(orderMapper::toResponse).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void cancelOverdueOrders() {
+        LocalDateTime thirtyMinutesAgo = LocalDateTime.now().minusMinutes(30);
+        List<Order> orders = orderRepository.findByStatusAndCreatedAtBefore(OrderStatus.PENDING_PAYMENT, thirtyMinutesAgo);
+        
+        for (Order order : orders) {
+            order.setStatus(OrderStatus.CANCELLED);
+            orderRepository.save(order);
+            auditLogService.log("AUTO_CANCEL_ORDER", "Order", order.getId(), "{\"reason\":\"Payment overdue\"}");
+            
+            for (OrderItem item : order.getItems()) {
+                ProductVariant variant = item.getProductVariant();
+                if (variant != null) {
+                    variant.setReservedQuantity(variant.getReservedQuantity() - item.getQuantity());
+                    variant.setStockQuantity(variant.getStockQuantity() + item.getQuantity());
+                    productVariantRepository.save(variant);
+                }
+            }
+        }
     }
 }

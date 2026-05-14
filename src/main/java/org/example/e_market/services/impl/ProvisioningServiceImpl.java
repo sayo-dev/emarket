@@ -56,6 +56,7 @@ public class ProvisioningServiceImpl implements ProvisioningService {
         final Flyway vendorFlyway = Flyway.configure()
                 .dataSource(dataSource)
                 .schemas(schemaName)
+//                .locations("classpath:db/migration/common")
                 .locations("classpath:db/migration/vendor")
                 .validateOnMigrate(true)
                 .baselineOnMigrate(true)

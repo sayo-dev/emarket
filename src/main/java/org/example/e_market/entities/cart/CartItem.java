@@ -21,7 +21,7 @@ import java.math.BigDecimal;
 public class CartItem extends AbstractEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private Cart cart;
+    private org.example.e_market.entities.cart.Cart cart;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private ProductVariant productVariant;

@@ -18,6 +18,6 @@ public class ProductResponse {
     String vendorId;
     String categoryName;
     List<VariantResponse> variants;
-    String primaryImageUrl;
+    String image_url;
     Double averageRating;
 }

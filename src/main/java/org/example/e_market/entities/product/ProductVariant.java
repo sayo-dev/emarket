@@ -33,4 +33,7 @@ public class ProductVariant extends AbstractEntity {
     private Integer stockQuantity;
 
     private Integer reservedQuantity = 0;
+
+    @Version
+    private Long version;
 }

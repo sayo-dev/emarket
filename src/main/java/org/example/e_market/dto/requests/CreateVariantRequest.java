@@ -10,6 +10,7 @@ public record CreateVariantRequest(
         @NotBlank String sku,
         @NotBlank String name,
         @NotNull @PositiveOrZero BigDecimal priceModifier,
-        @NotNull @PositiveOrZero Integer stockQuantity
+        @NotNull @PositiveOrZero Integer stockQuantity,
+        @NotNull @PositiveOrZero Integer reservedQuantity
 ) {
 }

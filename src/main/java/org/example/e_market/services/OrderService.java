@@ -21,4 +21,6 @@ public interface OrderService {
     void requestCancellation(Long orderId);
 
     List<OrderResponse> getOverdueOrders();
+
+    void cancelOverdueOrders();
 }
