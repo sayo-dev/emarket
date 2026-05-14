@@ -7,6 +7,7 @@ import org.example.e_market.dto.requests.*;
 import org.example.e_market.services.AuthService;
 import org.example.e_market.common.ApiResponse;
 import org.example.e_market.common.TokenPair;
+import org.example.e_market.dto.responses.LoginResponse;
 import org.example.e_market.utils.views.OtpView;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,10 +42,10 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<TokenPair>> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
 
-        TokenPair tokenPair = authService.login(request);
-        return ResponseEntity.ok(ApiResponse.success("Login successful", tokenPair));
+        LoginResponse loginResponse = authService.login(request);
+        return ResponseEntity.ok(ApiResponse.success("Login successful", loginResponse));
     }
 
     @PostMapping("/verify-otp")

@@ -2,6 +2,7 @@ package org.example.e_market.services;
 
 import org.example.e_market.dto.requests.*;
 import org.example.e_market.common.TokenPair;
+import org.example.e_market.dto.responses.LoginResponse;
 
 public interface AuthService {
 
@@ -9,7 +10,7 @@ public interface AuthService {
 
     void registerVendor(VendorRequest request);
 
-    TokenPair login(LoginRequest request);
+    LoginResponse login(LoginRequest request);
 
     TokenPair refreshToken(TokenRefreshRequest request);
 

@@ -27,7 +27,7 @@ public class PageResponse<T> {
         return PageResponse.
                 <T>builder()
                 .content(page.getContent())
-                .page(page.getNumber())
+                .page(page.getNumber() + 1)
                 .size(page.getSize())
                 .totalElements(page.getTotalElements())
                 .totalPages(page.getTotalPages())

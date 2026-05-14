@@ -1,5 +1,6 @@
 package org.example.e_market.services.impl;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.e_market.common.PageResponse;
@@ -105,5 +106,12 @@ public class AdminServiceImpl implements AdminService {
         return vendorRepository.findById(vendorId).orElseThrow(()
                 -> new CustomNotFoundException("Vendor not found"));
 
+    }
+
+    @PostConstruct
+    public void initPlatformConfig(
+
+    ) {
+        updateGlobalConfig(BigDecimal.valueOf(23), BigDecimal.valueOf(50000), PayoutSchedule.MONTHLY);
     }
 }

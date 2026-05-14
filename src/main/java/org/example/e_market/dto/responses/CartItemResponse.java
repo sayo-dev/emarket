@@ -1,18 +1,17 @@
 package org.example.e_market.dto.responses;
 
 import lombok.Builder;
-import lombok.Value;
+import lombok.Getter;
 
 import java.math.BigDecimal;
 
-@Value
+@Getter
 @Builder
 public class CartItemResponse {
-    Long id;
-    Long variantId;
-    String variantName;
-    String sku;
-    Integer quantity;
-    BigDecimal unitPrice;
-    BigDecimal total;
+    private Long id;
+    private String variantName;
+    private String sku;
+    private BigDecimal price;
+    private Integer quantity;
+    private BigDecimal total;
 }

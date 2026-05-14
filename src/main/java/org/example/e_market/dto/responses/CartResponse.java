@@ -1,15 +1,15 @@
 package org.example.e_market.dto.responses;
 
 import lombok.Builder;
-import lombok.Value;
+import lombok.Getter;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-@Value
+@Getter
 @Builder
 public class CartResponse {
-    Long id;
-    List<CartItemResponse> items;
-    BigDecimal subtotal;
+    private Long id;
+    private List<CartItemResponse> items;
+    private BigDecimal subtotal;
 }

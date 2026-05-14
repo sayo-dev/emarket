@@ -79,7 +79,7 @@ CREATE TABLE products
 
 CREATE TABLE product_images
 (
-    id            BIGSERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     created_at    TIMESTAMP NOT NULL,
     updated_at    TIMESTAMP,
     deleted       BOOLEAN   NOT NULL DEFAULT FALSE,
@@ -93,27 +93,27 @@ CREATE TABLE product_images
 CREATE TABLE product_variants
 (
     id BIGSERIAL PRIMARY KEY,
-    created_at     TIMESTAMP NOT NULL,
-    updated_at     TIMESTAMP,
-    deleted        BOOLEAN   NOT NULL DEFAULT FALSE,
-    product_id     BIGINT,
-    name           VARCHAR(255),
-    sku            VARCHAR(255) UNIQUE,
-    price_modifier DECIMAL(19, 2),
-    stock_quantity INTEGER,
+    created_at        TIMESTAMP NOT NULL,
+    updated_at        TIMESTAMP,
+    deleted           BOOLEAN   NOT NULL DEFAULT FALSE,
+    product_id        BIGINT,
+    name              VARCHAR(255),
+    sku               VARCHAR(255) UNIQUE,
+    price_modifier    DECIMAL(19, 2),
+    stock_quantity    INTEGER,
     reserved_quantity INTEGER,
-    version           BIGINT DEFAULT 0,
+    version           BIGINT             DEFAULT 0,
     CONSTRAINT fk_product_variants_product FOREIGN KEY (product_id) REFERENCES products (id)
 );
 
 CREATE TABLE carts
 (
     id BIGSERIAL PRIMARY KEY,
-    created_at   TIMESTAMP NOT NULL,
-    updated_at   TIMESTAMP,
-    deleted      BOOLEAN   NOT NULL DEFAULT FALSE,
-    customer_id  VARCHAR(255),
-    status       VARCHAR(255)       DEFAULT 'ACTIVE',
+    created_at  TIMESTAMP NOT NULL,
+    updated_at  TIMESTAMP,
+    deleted     BOOLEAN   NOT NULL DEFAULT FALSE,
+    customer_id VARCHAR(255),
+    status      VARCHAR(255)       DEFAULT 'ACTIVE',
     CONSTRAINT fk_carts_customer FOREIGN KEY (customer_id) REFERENCES users (id)
 );
 

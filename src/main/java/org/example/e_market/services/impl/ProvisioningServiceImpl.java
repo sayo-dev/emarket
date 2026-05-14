@@ -27,14 +27,11 @@ public class ProvisioningServiceImpl implements ProvisioningService {
         try {
             log.info("Provisioning vendor: {}  (schema: {})", vendor.getBusinessName(), schemaName);
 
-            //create schema
             createSchema(schemaName);
             log.info("Created schema {} successfully", schemaName);
 
-            //run flyway migration for schema
             runVendorMigration(schemaName);
 
-            //initialize default data
         } catch (Exception e) {
 
             try {

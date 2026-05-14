@@ -20,6 +20,7 @@ import org.example.e_market.services.EmailService;
 import org.example.e_market.services.AuthService;
 import org.example.e_market.utils.Helper;
 import org.example.e_market.common.TokenPair;
+import org.example.e_market.dto.responses.LoginResponse;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -103,7 +104,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public TokenPair login(LoginRequest request) {
+    public LoginResponse login(LoginRequest request) {
 
         var auth = authManager.authenticate(new UsernamePasswordAuthenticationToken(request.email(), request.password()));
 
@@ -113,7 +114,12 @@ public class AuthServiceImpl implements AuthService {
             throw new CustomBadRequestException("User not verified");
         }
         String vendorId = (user.getVendor() != null) ? user.getVendor().getId() : null;
-        return jwtService.generateTokenPair(auth, user.getAccountType().name(), vendorId);
+        TokenPair tokenPair = jwtService.generateTokenPair(auth, user.getAccountType().name(), vendorId);
+        
+        return LoginResponse.builder()
+                .tokenPair(tokenPair)
+                .accountType(user.getAccountType().name())
+                .build();
     }
 
     @Override

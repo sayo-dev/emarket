@@ -57,16 +57,19 @@ public class CategoryServiceImpl implements CategoryService {
         if (request.parentCategoryId() != null) {
             parent = categoryRepository.findById(request.parentCategoryId())
                     .orElseThrow(() -> new CustomNotFoundException("Parent category not found"));
-            
-            // Check circular reference
+
             Category current = parent;
             while (current != null) {
                 if (current.getId().equals(id)) {
-                    throw new CustomConflictException("Circular reference detected: cannot set parent to a child category");
+                    throw new CustomConflictException(
+                            "Circular reference detected: cannot set parent to a child category");
                 }
                 current = current.getParentCategory();
             }
         }
+
+        if (categoryRepository.existsByNameIgnoreCase(request.name()))
+            throw new CustomConflictException("Category already created");
 
         category.setName(request.name());
         category.setParentCategory(parent);

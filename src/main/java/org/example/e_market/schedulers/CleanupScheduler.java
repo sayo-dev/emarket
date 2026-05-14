@@ -15,13 +15,13 @@ public class CleanupScheduler {
     private final OrderService orderService;
     private final CartService cartService;
 
-    @Scheduled(cron = "0 */5 * * * *") // Every 5 minutes
+    @Scheduled(cron = "0 */5 * * * *") // 5 minutes
     public void cleanUpPendingOrders() {
         log.info("Running scheduled job: cleanUpPendingOrders");
         orderService.cancelOverdueOrders();
     }
 
-    @Scheduled(cron = "0 0 0 * * *") // Daily at midnight
+    @Scheduled(cron = "0 0 0 * * *") // midnight(saily)
     public void cleanUpAbandonedCarts() {
         log.info("Running scheduled job: cleanUpAbandonedCarts");
         cartService.markAbandonedCarts();

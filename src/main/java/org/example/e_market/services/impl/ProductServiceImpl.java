@@ -149,7 +149,8 @@ public class ProductServiceImpl implements ProductService {
             String variantNames = zeroStockVariants.stream()
                     .map(v -> v.getName() != null ? v.getName() : v.getSku())
                     .collect(Collectors.joining(", "));
-            throw new CustomBadRequestException("Cannot publish product because the following variants have zero stock: " + variantNames);
+            throw new CustomBadRequestException(
+                    "Cannot publish product because the following variants have zero stock: " + variantNames);
         }
 
         product.setProductStatus(ProductStatus.ACTIVE);
@@ -165,7 +166,8 @@ public class ProductServiceImpl implements ProductService {
         variant.setStockQuantity(variant.getStockQuantity() + quantity);
         productVariantRepository.save(variant);
 
-        auditLogService.log("UPDATE_STOCK", "ProductVariant", variantId, "{\"reason\":\"" + reason + "\",\"quantity\":" + quantity + "}");
+        auditLogService.log("UPDATE_STOCK", "ProductVariant", variantId,
+                "{\"reason\":\"" + reason + "\",\"quantity\":" + quantity + "}");
     }
 
     @Override
@@ -182,7 +184,7 @@ public class ProductServiceImpl implements ProductService {
     public PageResponse<ProductResponse> searchProducts(ProductFilter filter, int page, int size, String sortBy,
             String sortDir) {
         Sort sort = sortDir.equalsIgnoreCase("DESC") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
-        Pageable pageable = PageRequest.of(page, size, sort);
+        Pageable pageable = PageRequest.of(page > 0 ? page - 1 : 0, size, sort);
         Specification<Product> spec = ProductSpecification.filter(filter);
 
         Page<Product> result = productRepository.findAll(spec, pageable);

@@ -54,7 +54,7 @@ public class CartServiceImpl implements CartService {
                     return cartRepository.save(newCart);
                 });
 
-        ProductVariant variant = productVariantRepository.findByIdWithLock(variantId)
+        ProductVariant variant = productVariantRepository.findById(variantId)
                 .orElseThrow(() -> new CustomNotFoundException("Product variant not found"));
 
         int currentReserved = variant.getReservedQuantity() != null ? variant.getReservedQuantity() : 0;
@@ -91,7 +91,7 @@ public class CartServiceImpl implements CartService {
         CartItem item = cartItemRepository.findById(itemId)
                 .orElseThrow(() -> new CustomNotFoundException("Cart item not found"));
 
-        ProductVariant variant = productVariantRepository.findByIdWithLock(item.getProductVariant().getId())
+        ProductVariant variant = productVariantRepository.findById(item.getProductVariant().getId())
                 .orElseThrow(() -> new CustomNotFoundException("Product variant not found"));
 
         int currentReserved = variant.getReservedQuantity() != null ? variant.getReservedQuantity() : 0;
@@ -125,11 +125,12 @@ public class CartServiceImpl implements CartService {
             BigDecimal total = item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
             return CartItemResponse.builder()
                     .id(item.getId())
-                    .variantId(item.getProductVariant().getId())
+                    .price(item.getUnitPrice())
+//                    .variantId(item.getProductVariant().getId())
                     .variantName(item.getProductVariant().getName())
                     .sku(item.getProductVariant().getSku())
                     .quantity(item.getQuantity())
-                    .unitPrice(item.getUnitPrice())
+//                    .unitPrice(item.getUnitPrice())
                     .total(total)
                     .build();
         }).collect(Collectors.toList());
@@ -167,7 +168,7 @@ public class CartServiceImpl implements CartService {
                 .build();
 
         for (CartItem cartItem : cart.getItems()) {
-            ProductVariant variant = productVariantRepository.findByIdWithLock(cartItem.getProductVariant().getId())
+            ProductVariant variant = productVariantRepository.findById(cartItem.getProductVariant().getId())
                     .orElseThrow(() -> new CustomNotFoundException("Product variant not found"));
 
             int currentReserved = variant.getReservedQuantity() != null ? variant.getReservedQuantity() : 0;
@@ -220,7 +221,7 @@ public class CartServiceImpl implements CartService {
     public void markAbandonedCarts() {
         LocalDateTime twentyFourHoursAgo = LocalDateTime.now().minusHours(24);
         List<Cart> carts = cartRepository.findByStatusAndUpdatedAtBefore(CartStatus.ACTIVE, twentyFourHoursAgo);
-        
+
         for (Cart cart : carts) {
             cart.setStatus(CartStatus.ABANDONED);
             cartRepository.save(cart);

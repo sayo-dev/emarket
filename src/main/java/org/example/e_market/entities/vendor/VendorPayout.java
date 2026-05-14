@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 @Table(name = "vendor_payouts")
 public class VendorPayout extends AbstractEntity {
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     private Vendor vendor;
 
     private BigDecimal amount;

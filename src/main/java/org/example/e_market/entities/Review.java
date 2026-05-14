@@ -18,10 +18,10 @@ import org.example.e_market.entities.product.Product;
 @Table(name = "reviews")
 public class Review extends AbstractEntity {
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     private Product product;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     private User customer;
 
     @OneToOne(fetch = FetchType.LAZY)

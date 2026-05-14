@@ -23,7 +23,6 @@ import java.time.LocalDateTime;
 @Table(name = "order_items")
 public class OrderItem extends AbstractEntity {
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     private Order order;
 
@@ -43,6 +42,5 @@ public class OrderItem extends AbstractEntity {
     private LocalDateTime shippedAt;
 
     private LocalDateTime deliveredAt;
-
 
 }

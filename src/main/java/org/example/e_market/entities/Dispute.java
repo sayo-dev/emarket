@@ -24,11 +24,11 @@ public class Dispute extends AbstractEntity {
     @OneToOne(fetch = FetchType.LAZY)
     private Order order;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "raised_by_user_id")
     private User user;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     private Vendor vendor;
 
     private String reason;
@@ -42,7 +42,7 @@ public class Dispute extends AbstractEntity {
     @Enumerated(EnumType.STRING)
     private DisputeStatus status = DisputeStatus.OPEN;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     private User resolvedBy;
 
     private LocalDateTime resolvedAt;
