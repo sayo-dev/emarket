@@ -2,6 +2,11 @@
 
 The backend service for the E-Market application, built with Spring Boot.
 
+## API Documentation
+
+The interactive API documentation is available via Swagger UI:
+- [Swagger UI](https://injured-jeannette-subcuticular.ngrok-free.dev/swagger-ui/index.html)
+
 ## Features
 
 - **Authentication**: JWT-based authentication with access and refresh tokens.

@@ -20,9 +20,13 @@ import io.swagger.v3.oas.annotations.servers.Server;
                         description = "LOCAL ENV"
                 ),
                 @Server(
-                url = "https://emarket-production.up.railway.app",
-                description = "REMOTE ENV"
-        )
+                        url = "https://emarket-production.up.railway.app",
+                        description = "REMOTE ENV"
+                ),
+                @Server(
+                        url = "https://injured-jeannette-subcuticular.ngrok-free.dev",
+                        description = "REMOTE ENV"
+                )
         },
         security = {
                 @SecurityRequirement(
