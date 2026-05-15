@@ -1,7 +1,6 @@
 spring:
   application:
     name: e_market
-
   config:
     import: "optional:file:.env[.properties]"
 

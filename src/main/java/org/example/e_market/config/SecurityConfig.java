@@ -108,7 +108,8 @@ public class SecurityConfig {
         ));
 
         corsConfiguration.setAllowedOrigins(List.of(
-                "http://localhost:8080"
+                "http://localhost:8080",
+                "https://emarket-production.up.railway.app"
         ));
 
         corsConfiguration.setAllowCredentials(true);

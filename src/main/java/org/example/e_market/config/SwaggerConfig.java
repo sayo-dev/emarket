@@ -18,7 +18,11 @@ import io.swagger.v3.oas.annotations.servers.Server;
                 @Server(
                         url = "http://localhost:8080",
                         description = "LOCAL ENV"
-                )
+                ),
+                @Server(
+                url = "https://emarket-production.up.railway.app",
+                description = "REMOTE ENV"
+        )
         },
         security = {
                 @SecurityRequirement(
