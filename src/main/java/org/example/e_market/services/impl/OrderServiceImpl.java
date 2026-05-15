@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -48,6 +49,7 @@ public class OrderServiceImpl implements OrderService {
     public List<OrderResponse> getCustomerOrders() {
         User user = currentUserUtil.getCurrentUser();
         List<Order> orders = orderRepository.findByUser(user);
+        Collections.reverse(orders);
         return orders.stream().map(orderMapper::toResponse).collect(Collectors.toList());
     }
 
@@ -58,7 +60,7 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new CustomNotFoundException("Order not found"));
 
         if (order.getStatus() != OrderStatus.PENDING_PAYMENT) {
-            throw new CustomBadRequestException("Order is not in PENDING_PAYMENT status");
+            throw new CustomBadRequestException("Order is not pending");
         }
 
         order.setStatus(OrderStatus.PAID);
@@ -75,6 +77,7 @@ public class OrderServiceImpl implements OrderService {
         } else {
             items = orderItemRepository.findByVendor(vendor);
         }
+        Collections.reverse(items);
         return items.stream().map(orderMapper::toOrderItemResponse).collect(Collectors.toList());
     }
 
@@ -132,7 +135,8 @@ public class OrderServiceImpl implements OrderService {
                     .orElseGet(() -> PlatformConfig.builder().build());
             BigDecimal commissionRate = config.getCommissionRatePercent().divide(BigDecimal.valueOf(100));
 
-            Map<Vendor, List<OrderItem>> byVendor = allItems.stream().collect(Collectors.groupingBy(OrderItem::getVendor));
+            Map<Vendor, List<OrderItem>> byVendor = allItems.stream()
+                    .collect(Collectors.groupingBy(OrderItem::getVendor));
 
             for (Map.Entry<Vendor, List<OrderItem>> entry : byVendor.entrySet()) {
                 Vendor v = entry.getKey();
@@ -161,7 +165,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         if (order.getStatus() != OrderStatus.PENDING_PAYMENT && order.getStatus() != OrderStatus.PAID) {
-            throw new CustomBadRequestException("Order cannot be cancelled in current status");
+            throw new CustomBadRequestException("Order cannot be cancelled");
         }
 
         order.setStatus(OrderStatus.CANCELLED);
@@ -180,7 +184,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<OrderResponse> getOverdueOrders() {
-        LocalDateTime threeDaysAgo = LocalDateTime.now().minusMinutes(3);
+        LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(3);
         List<Order> orders = orderRepository.findByStatusAndCreatedAtBefore(OrderStatus.PAID, threeDaysAgo);
         return orders.stream().map(orderMapper::toResponse).collect(Collectors.toList());
     }
@@ -189,13 +193,14 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public void cancelOverdueOrders() {
         LocalDateTime thirtyMinutesAgo = LocalDateTime.now().minusMinutes(30);
-        List<Order> orders = orderRepository.findByStatusAndCreatedAtBefore(OrderStatus.PENDING_PAYMENT, thirtyMinutesAgo);
-        
+        List<Order> orders = orderRepository.findByStatusAndCreatedAtBefore(OrderStatus.PENDING_PAYMENT,
+                thirtyMinutesAgo);
+
         for (Order order : orders) {
             order.setStatus(OrderStatus.CANCELLED);
             orderRepository.save(order);
             auditLogService.log("AUTO_CANCEL_ORDER", "Order", order.getId(), "{\"reason\":\"Payment overdue\"}");
-            
+
             for (OrderItem item : order.getItems()) {
                 ProductVariant variant = item.getProductVariant();
                 if (variant != null) {
