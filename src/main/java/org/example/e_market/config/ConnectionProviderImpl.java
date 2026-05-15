@@ -34,27 +34,34 @@ public class ConnectionProviderImpl implements MultiTenantConnectionProvider<Str
         log.debug("Getting connection for vendor: {}", tenantIdentifier);
         final Connection connection = getAnyConnection();
 
-        try {
-            if (tenantIdentifier != null && !tenantIdentifier.equals("public")) {
-                connection.createStatement().execute("SET search_path TO " + tenantIdentifier + ", public");
+        if (tenantIdentifier != null && !tenantIdentifier.equals("public")) {
+            try (var stmt = connection.createStatement()) {
+                stmt.execute("SET search_path TO " + tenantIdentifier + ", public");
                 log.trace("Set search_path to {}", tenantIdentifier);
+            } catch (SQLException e) {
+                log.warn("Error setting search_path to {}. Falling back to public. Error: {}", tenantIdentifier,
+                        e.getMessage());
+                try (var stmt = connection.createStatement()) {
+                    stmt.execute("SET search_path TO public");
+                } catch (SQLException ex) {
+                    log.error("Error resetting search_path to public after failure", ex);
+                    connection.close();
+                    throw ex;
+                }
             }
-        } catch (Exception e) {
-            log.warn("Error setting search_path to {}. Falling back to public. Error: {}", tenantIdentifier,
-                    e.getMessage());
-            releaseConnection(tenantIdentifier, connection);
         }
         return connection;
-
     }
 
     @Override
     public void releaseConnection(String tenantIdentifier, Connection connection) throws SQLException {
-        try {
-            connection.createStatement().execute("SET search_path TO public");
+        try (var stmt = connection.createStatement()) {
+            stmt.execute("SET search_path TO public");
         } catch (final SQLException e) {
             log.error("Error releasing search_path", e);
             throw e;
+        } finally {
+            connection.close();
         }
     }
 

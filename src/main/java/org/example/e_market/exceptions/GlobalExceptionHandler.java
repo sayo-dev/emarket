@@ -3,6 +3,7 @@ package org.example.e_market.exceptions;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.*;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -21,8 +22,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ProblemDetail handleUnauthorizedException(UnauthorizedException ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatus.UNAUTHORIZED,
-                ex.getMessage()
-        );
+                ex.getMessage());
         problemDetail.setTitle("Unauthorized");
         problemDetail.setProperty("timestamp", LocalDateTime.now());
         return problemDetail;
@@ -32,8 +32,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ProblemDetail handleCustomBadRequestException(CustomBadRequestException ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_REQUEST,
-                ex.getMessage()
-        );
+                ex.getMessage());
         problemDetail.setTitle("Bad request");
         problemDetail.setProperty("timestamp", LocalDateTime.now());
         return problemDetail;
@@ -43,19 +42,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ProblemDetail handleCustomNotFoundException(CustomNotFoundException ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatus.NOT_FOUND,
-                ex.getMessage()
-        );
+                ex.getMessage());
         problemDetail.setTitle("Resource Not Found");
         problemDetail.setProperty("timestamp", LocalDateTime.now());
         return problemDetail;
     }
 
-    @ExceptionHandler(BadCredentialsException.class)
-    public ProblemDetail handleBadCredentialsException(BadCredentialsException ex) {
+    @ExceptionHandler({ BadCredentialsException.class, InternalAuthenticationServiceException.class })
+    public ProblemDetail handleAuthException(Exception ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatus.BAD_REQUEST,
-                ex.getMessage()
-        );
+                "Bad credentials");
         problemDetail.setTitle("Bad credentials");
         problemDetail.setProperty("timestamp", LocalDateTime.now());
         return problemDetail;
@@ -65,40 +62,38 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ProblemDetail handleCustomConflictException(CustomConflictException ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatus.CONFLICT,
-                ex.getMessage()
-        );
+                ex.getMessage());
         problemDetail.setTitle("Conflict");
         problemDetail.setProperty("timestamp", LocalDateTime.now());
         return problemDetail;
     }
 
-    //    @ExceptionHandler(InsufficientStockException.class)
-//    public ProblemDetail handleStockIssue(InsufficientStockException ex) {
-//        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-//                HttpStatus.BAD_REQUEST,
-//                ex.getMessage()
-//        );
-//        problemDetail.setTitle("Inventory Conflict");
-//        problemDetail.setType(URI.create("https://api.marketplace.com/errors/insufficient-stock"));
-//        return problemDetail;
-//    }
+    // @ExceptionHandler(InsufficientStockException.class)
+    // public ProblemDetail handleStockIssue(InsufficientStockException ex) {
+    // ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+    // HttpStatus.BAD_REQUEST,
+    // ex.getMessage()
+    // );
+    // problemDetail.setTitle("Inventory Conflict");
+    // problemDetail.setType(URI.create("https://api.marketplace.com/errors/insufficient-stock"));
+    // return problemDetail;
+    // }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ProblemDetail handleAccessDenied(AccessDeniedException ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatus.FORBIDDEN,
-                "You do not have permission to perform this action."
-        );
+                "You do not have permission to perform this action.");
         problemDetail.setTitle("Forbidden Access");
         return problemDetail;
     }
 
     @ExceptionHandler(org.springframework.security.authorization.AuthorizationDeniedException.class)
-    public ProblemDetail handleAuthorizationDenied(org.springframework.security.authorization.AuthorizationDeniedException ex) {
+    public ProblemDetail handleAuthorizationDenied(
+            org.springframework.security.authorization.AuthorizationDeniedException ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatus.FORBIDDEN,
-                "Access Denied: You do not have permission to perform this action."
-        );
+                "Access Denied: You do not have permission to perform this action.");
         problemDetail.setTitle("Forbidden Access");
         problemDetail.setProperty("timestamp", LocalDateTime.now());
         return problemDetail;
@@ -113,14 +108,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 status,
-                "Your request contains invalid parameters."
-        );
+                "Your request contains invalid parameters.");
         problemDetail.setTitle("Validation Failed");
 
         Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error ->
-                errors.put(error.getField(), error.getDefaultMessage())
-        );
+        ex.getBindingResult().getFieldErrors()
+                .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
 
         problemDetail.setProperty("errors", errors);
         return ResponseEntity.status(status).body(problemDetail);
@@ -133,8 +126,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         System.out.println(ex.toString());
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                 HttpStatus.INTERNAL_SERVER_ERROR,
-                "An unexpected error occurred on the server."
-        );
+                "An unexpected error occurred on the server.");
         problemDetail.setTitle("Server Error");
         return problemDetail;
     }

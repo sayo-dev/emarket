@@ -27,6 +27,7 @@ public class Order extends AbstractEntity {
     @JoinColumn(name = "customer_id")
     private User user;
 
+    @Enumerated(EnumType.STRING)
     private OrderStatus status = OrderStatus.PENDING_PAYMENT;
 
     private BigDecimal subtotal;

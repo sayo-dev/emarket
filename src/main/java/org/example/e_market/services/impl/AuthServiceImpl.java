@@ -23,6 +23,7 @@ import org.example.e_market.common.TokenPair;
 import org.example.e_market.dto.responses.LoginResponse;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -108,7 +109,7 @@ public class AuthServiceImpl implements AuthService {
 
         var auth = authManager.authenticate(new UsernamePasswordAuthenticationToken(request.email(), request.password()));
 
-        User user = userRepository.findByEmailIgnoreCase(request.email()).orElseThrow(() -> new CustomNotFoundException("User not found"));
+        User user = userRepository.findByEmailIgnoreCase(request.email()).orElseThrow(() -> new BadCredentialsException("User not found"));
 
         if (!user.isVerified()) {
             throw new CustomBadRequestException("User not verified");

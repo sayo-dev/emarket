@@ -180,7 +180,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<OrderResponse> getOverdueOrders() {
-        LocalDateTime threeDaysAgo = LocalDateTime.now().minusDays(3);
+        LocalDateTime threeDaysAgo = LocalDateTime.now().minusMinutes(3);
         List<Order> orders = orderRepository.findByStatusAndCreatedAtBefore(OrderStatus.PAID, threeDaysAgo);
         return orders.stream().map(orderMapper::toResponse).collect(Collectors.toList());
     }

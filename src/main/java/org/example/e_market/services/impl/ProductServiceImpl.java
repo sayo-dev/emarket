@@ -72,7 +72,6 @@ public class ProductServiceImpl implements ProductService {
                     .product(product)
                     .sku(vr.sku())
                     .name(vr.name())
-                    .reservedQuantity(vr.reservedQuantity())
                     .priceModifier(vr.priceModifier())
                     .stockQuantity(vr.stockQuantity())
                     .build();
@@ -182,7 +181,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public PageResponse<ProductResponse> searchProducts(ProductFilter filter, int page, int size, String sortBy,
-            String sortDir) {
+                                                        String sortDir) {
         Sort sort = sortDir.equalsIgnoreCase("DESC") ? Sort.by(sortBy).descending() : Sort.by(sortBy).ascending();
         Pageable pageable = PageRequest.of(page > 0 ? page - 1 : 0, size, sort);
         Specification<Product> spec = ProductSpecification.filter(filter);

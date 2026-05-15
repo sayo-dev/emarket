@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.e_market.entities.User;
 import org.example.e_market.exceptions.CustomNotFoundException;
 import org.example.e_market.repositories.UserRepository;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,7 +23,7 @@ public class CustomUserDetailService implements UserDetailsService {
 
         User user = userRepository.findByEmailIgnoreCase(username).orElseThrow(()
                 ->
-                new CustomNotFoundException("User not found")
+                new BadCredentialsException("User not found")
         );
 
         return org.springframework.security.core.userdetails.User.builder()

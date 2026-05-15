@@ -30,7 +30,7 @@ public class ProductController {
                                                                                      @RequestParam(defaultValue = "1") int page,
                                                                                      @RequestParam(defaultValue = "10") int size,
                                                                                      @RequestParam(defaultValue = "createdAt") String sortBy,
-                                                                                     @RequestParam(defaultValue = "ASC") String sortDir) {
+                                                                                     @RequestParam(defaultValue = "DESC") String sortDir) {
         final ProductFilter filter = ProductFilter.builder()
                 .name(name).categoryId(categoryId).minPrice(minPrice).maxPrice(maxPrice).vendorId(vendorId).minRating(minRating).build();
 
